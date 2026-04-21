@@ -60,4 +60,19 @@ public class Persistencia
         InicializarSucursales();
         InicializarVehiculos();
     }
+
+    public static void AgregarVehiculo(Vehiculo v)
+    {
+        Vehiculos.Add(v);
+    }
+
+    public static List<Sucursal> GetSucursales()
+    {
+        return Sucursales;
+    }
+
+    public static Sucursal? GetSucursalPorCodigo(string codigo)
+    {
+        return Sucursales.Find(s => s.GetCodigo() == codigo);
+    }
 }

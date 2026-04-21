@@ -1,4 +1,8 @@
-﻿namespace Dsw2026Ej5.Views;
+﻿using Dsw2026Ej5.Data;
+using Dsw2026Ej5.Domain;
+using System.Linq;
+
+namespace Dsw2026Ej5.Views;
 
 public class ConsoleView
 {
@@ -26,7 +30,7 @@ public class ConsoleView
             }
             else if (opcion == "2")
             {
-                Console.WriteLine("Agregando vehículo...");
+                AgregarVehiculo();
             }
         }
         while (opcion != "3");
@@ -80,8 +84,8 @@ public class ConsoleView
         }
         (double, double) totalConsumos = Controlador.CalcularConsumos(vehiculos);               
             DibujarLinea();
-        Console.WriteLine($"Total consumo Vehículos Eléctricos: {totalConsumos.Item1} kWh");
-        Console.WriteLine($"Total consumo Vehículos Combustible: {totalConsumos.Item2} Litros");
+        Console.WriteLine($"Total consumo Vehículos Eléctricos: {totalConsumos.Item1:F2} kWh");
+        Console.WriteLine($"Total consumo Vehículos Combustible: {totalConsumos.Item2:F2} Litros");
         DibujarLinea();
         Console.Write("\n");
         Console.Write("\n");
@@ -132,5 +136,206 @@ public class ConsoleView
             CentrarTexto(vehiculo.GetKmARecorrer().ToString(), out l, ancho - 1, false);
             Console.Write("".PadRight(ancho - 1 - l));
         }
+
     }
+
+    private static void AgregarVehiculo()
+    {
+        LimpiarPantalla();
+
+        DibujarLinea();
+        CentrarTexto("Agregar Vehiculo", out int _);
+        DibujarLinea();
+        Console.WriteLine();
+
+        
+        Console.WriteLine("Seleccione tipo:");
+        Console.WriteLine("1. Eléctrico");
+        Console.WriteLine("2. Combustible");
+        Console.Write("Opción: ");
+        string tipo = Console.ReadLine()?.Trim() ?? "0";
+
+        while (tipo != "1" && tipo != "2")
+        {
+            Console.Write("Opción inválida. Ingrese 1 o 2: ");
+            tipo = Console.ReadLine()?.Trim() ?? "0";
+        }
+
+        Console.WriteLine();
+
+       
+        Console.Write("Patente: ");
+        string patente = Console.ReadLine()?.Trim() ?? "";
+
+        Console.Write("Marca: ");
+        string marca = Console.ReadLine()?.Trim() ?? "";
+
+        Console.Write("Modelo: ");
+        string modelo = Console.ReadLine()?.Trim() ?? "";
+
+        Console.Write("Año: ");
+        int anio;
+        while (!int.TryParse(Console.ReadLine(), out anio))
+        {
+            Console.Write("Valor inválido. Ingrese año: ");
+        }
+
+        Console.Write("Capacidad de carga: ");
+        double carga;
+        while (!double.TryParse(Console.ReadLine(), out carga))
+        {
+            Console.Write("Valor inválido. Ingrese capacidad: ");
+        }
+
+        Console.WriteLine();
+
+        
+        Console.WriteLine("Seleccione sucursal:");
+        Console.WriteLine("1. SUC01");
+        Console.WriteLine("2. SUC02");
+        Console.Write("Opción: ");
+
+        string opSucursal = Console.ReadLine()?.Trim() ?? "1";
+
+        while (opSucursal != "1" && opSucursal != "2")
+        {
+            Console.Write("Opción inválida. Ingrese 1 o 2: ");
+            opSucursal = Console.ReadLine()?.Trim() ?? "1";
+        }
+
+        Sucursal sucursal;
+
+        if (opSucursal == "1")
+            sucursal = Persistencia.GetSucursales()[0];
+        else
+            sucursal = Persistencia.GetSucursales()[1];
+
+        Console.WriteLine();
+
+        Vehiculo nuevo;
+
+     
+        if (tipo == "1")
+        {
+            Console.Write("kWh base: ");
+            double kwh;
+
+            while (!double.TryParse(Console.ReadLine(), out kwh))
+            {
+                Console.Write("Valor inválido. Ingrese kWh: ");
+            }
+
+            nuevo = new VehiculoElectrico(
+                patente,
+                marca,
+                modelo,
+                anio,
+                carga,
+                sucursal,
+                kwh
+            );
+        }
+        else
+        {
+            Console.Write("Km por litro: ");
+            double kmPorLitro;
+
+            while (!double.TryParse(Console.ReadLine(), out kmPorLitro))
+            {
+                Console.Write("Valor inválido. Ingrese Km/l: ");
+            }
+
+            Console.Write("Litros extra: ");
+            double litrosExtra;
+
+            while (!double.TryParse(Console.ReadLine(), out litrosExtra))
+            {
+                Console.Write("Valor inválido. Ingrese litros extra: ");
+            }
+
+            nuevo = new VehiculoCombustible(
+                patente,
+                marca,
+                modelo,
+                anio,
+                carga,
+                sucursal,
+                kmPorLitro,
+                litrosExtra
+            );
+        }
+
+        Persistencia.AgregarVehiculo(nuevo);
+        _vehiculos = Controlador.GetVehiculos();
+
+        Console.WriteLine();
+        Console.WriteLine("Vehículo agregado correctamente.");
+        Console.WriteLine("Presione ENTER para continuar...");
+        Console.ReadLine();
+    }
+
+
+
+    /*  private static void AgregarVehiculo()
+      {
+          LimpiarPantalla();
+
+          Console.Write("Patente: ");
+          string patente = Console.ReadLine();
+
+          Console.Write("Marca: ");
+          string marca = Console.ReadLine();
+
+          Console.Write("Modelo: ");
+          string modelo = Console.ReadLine();
+
+          Console.Write("Año: ");
+          int anio = int.Parse(Console.ReadLine());
+
+          Console.Write("Capacidad de carga: ");
+          double carga = double.Parse(Console.ReadLine());
+
+          Console.WriteLine("Tipo:");
+          Console.WriteLine("1. Electrico");
+          Console.WriteLine("2. Combustible");
+          string tipo = Console.ReadLine();
+
+          Vehiculo nuevo;
+
+      if (tipo == "1")
+      {
+          nuevo = new VehiculoElectrico(
+              patente,
+              marca,
+              modelo,
+              anio,
+              carga,
+              Persistencia.GetSucursales()[0],
+              16
+          );
+      }
+      else
+      {
+          nuevo = new VehiculoCombustible(
+              patente,
+              marca,
+              modelo,
+              anio,
+              carga,
+              Persistencia.GetSucursales()[0],
+              8,
+              1.5
+          );
+      }
+
+          Persistencia.AgregarVehiculo(nuevo);
+
+          Console.WriteLine();
+          Console.WriteLine("Vehículo agregado correctamente.");
+          Console.WriteLine("Presione Enter para continuar...");
+          Console.ReadLine();
+  }*/
+
+
+
 }
